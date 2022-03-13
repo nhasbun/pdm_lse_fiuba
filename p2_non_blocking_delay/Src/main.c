@@ -24,15 +24,21 @@
 /** @addtogroup STM32F4xx_HAL_Examples
   * @{
   */
-
 /** @addtogroup UART_Printf
   * @{
   */
 
-/* Private typedef -----------------------------------------------------------*/
-/* Private define ------------------------------------------------------------*/
-/* Private macro -------------------------------------------------------------*/
-/* Private variables ---------------------------------------------------------*/
+// ** Parameters **
+
+// Default delay_t for safety
+#define DEFAULT_DELAY_T {0, 0, false}
+
+// Controls desired led delays in [ms].
+static const tick_t period_led_1 = 100;
+static const tick_t period_led_2 = 500;
+static const tick_t period_led_3 = 1000;
+static const tick_t max_led_period = 10000;
+
 /* UART handler declaration */
 UART_HandleTypeDef UartHandle;
 
@@ -65,15 +71,106 @@ int main(void)
   /* Configure the system clock to 180 MHz */
   SystemClock_Config();
 
-  /* Initialize BSP Led for LED2 */
+  // Enabling all LEDs
+  BSP_LED_Init(LED1);
   BSP_LED_Init(LED2);
+  BSP_LED_Init(LED3);
+
+  // Starting all LEDS off
+  BSP_LED_Off(LED1);
+  BSP_LED_Off(LED2);
+  BSP_LED_Off(LED3);
+
+  // Declaring all LEDs delays objects
+  delay_t delay_led_1 = DEFAULT_DELAY_T;
+  delay_t delay_led_2 = DEFAULT_DELAY_T;
+  delay_t delay_led_3 = DEFAULT_DELAY_T;
+
+  // Configuring all delays
+  delayInit(&delay_led_1, period_led_1);
+  delayInit(&delay_led_2, period_led_2);
+  delayInit(&delay_led_3, period_led_3);
 
   /* Infinite loop */
   while (1)
   {
-	  BSP_LED_Toggle(LED2);
-	  HAL_Delay(100);
+	  if (delayRead(&delay_led_1)) {
+		  BSP_LED_Toggle(LED1);
+	  }
+
+	  if (delayRead(&delay_led_2)) {
+		  BSP_LED_Toggle(LED2);
+	  }
+
+	  if (delayRead(&delay_led_3)) {
+		  BSP_LED_Toggle(LED3);
+	  }
   }
+}
+
+/**
+ * Initial configuration for non-blocking delay object.
+ *
+ * @param delay: some delay_t type instance
+ * @param duration: desired delay duration/period in ms
+ */
+void delayInit( delay_t * delay, tick_t duration ) {
+	delayWrite(delay, duration);
+}
+
+/**
+ * Starts delay object.
+ * If already started it checks for expired delay time.
+ *
+ * @param delay: some delay_t type instance
+ * @return true if expired delay time else false
+ */
+bool_t delayRead( delay_t * delay ) {
+
+	// Capturing null pointer error
+	if (delay == NULL) {
+		return false;
+	}
+
+	// Continuing regular routine
+	if (delay->running == false) {
+		delay->running = true;
+		delay->startTime = HAL_GetTick();
+		return false;
+	}
+
+	else {
+
+		tick_t current_time = HAL_GetTick();
+
+		if (current_time - delay->startTime > delay->duration) {
+			delay->startTime = current_time;
+			return true;
+		}
+
+		else return false;
+	}
+}
+
+/**
+ * Overrides delay duration for non-blocking delay object.
+ *
+ * @param delay: some delay_t type instance
+ * @param duration: desired delay duration/period in ms
+ */
+void delayWrite( delay_t * delay, tick_t duration ) {
+
+	// Capturing null pointer error
+	if (delay == NULL) {
+		return;
+	}
+
+	// Checking for max allowed period
+	if (duration > max_led_period) {
+		duration = max_led_period;
+	}
+
+	delay->duration = duration;
 }
 
 
