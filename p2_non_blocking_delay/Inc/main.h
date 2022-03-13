@@ -17,18 +17,36 @@
   ******************************************************************************
   */
 
+
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __MAIN_H
 #define __MAIN_H
 
+
 /* Includes ------------------------------------------------------------------*/
 #include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include "stm32f4xx_hal.h"  		/* <- HAL include */
 #include "stm32f4xx_nucleo_144.h" 	/* <- BSP include */
 
 
-
 /* Exported types ------------------------------------------------------------*/
+// Types used for non-blocking delay.
+typedef uint32_t tick_t;
+typedef bool bool_t;
+
+
+/*
+ * Struct defines a non-blocking delay object.
+ */
+typedef struct{
+   tick_t startTime;
+   tick_t duration;
+   bool_t running;
+} delay_t;
+
+
 /* Exported constants --------------------------------------------------------*/
 /* User can use this section to tailor USARTx/UARTx instance used and associated
    resources */
@@ -50,7 +68,16 @@
 #define USARTx_RX_AF                     GPIO_AF7_USART3
 
 /* Exported macro ------------------------------------------------------------*/
+
 /* Exported functions ------------------------------------------------------- */
+
+/*
+ * Exported function prototypes for delay_t objects.
+ */
+void delayInit( delay_t * delay, tick_t duration );
+bool_t delayRead( delay_t * delay );
+void delayWrite( delay_t * delay, tick_t duration );
+
 
 #endif /* __MAIN_H */
 
