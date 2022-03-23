@@ -10,4 +10,8 @@ Los proyectos base utilizados se han extraído del [repositorio del profesor Pat
 
 ## Carpetas
 
-* **p2_non_blocking_delay (Práctica 2):** Proyecto para importar en STM32Cube IDE. Consiste en la implementación y prueba con LEDs de **delays no bloqueantes**.
+Proyectos para importar en STM32Cube IDE:
+
+* **p2_non_blocking_delay (Práctica 2):** Consiste en la implementación y prueba con LEDs de **delays no bloqueantes**.
+* **p3_modularization (Práctica 3):** Ejemplo de modularización de funciones en C utilizando **delays no bloqueantes como ejemplo** para crear los archivos **API_delay.h y API_delay.c**.
+
